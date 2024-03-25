@@ -17,7 +17,7 @@ dist=20
 for spec in ${species[*]}
 do
   echo $spec  # -a 26,45,85  -necessary for compare
-  Rscript --vanilla blockSeparation.r predefined 600000 #random
+  Rscript --vanilla blockSeparation.r predefined 600000
   #Rscript --vanilla modelling.r "$species" "$model" "$dist" #20
   #Rscript --vanilla prediction.r "$species" 20 #"$dist"
   #Rscript --vanilla compare.r "$species" "$dist" "ABC"
