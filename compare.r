@@ -1,15 +1,15 @@
 #!/usr/bin/env Rscrip
 
-renv::load('/home/reichmut/Workspace/modelling')
+
 arg = commandArgs(trailingOnly=TRUE)
-source("~/Workspace/modelling/sourceFunctions.R")
+source("sourceFunctions.R")
 
 suppressPackageStartupMessages(library(sf))
 suppressPackageStartupMessages(library(stars))
 suppressPackageStartupMessages(library(terra))
 
 
-path = "/work/reichmut/Modelling/"
+path = ""/path/to/Folder/""
 species = arg[1]
 print(species)
 dist = 20
@@ -20,12 +20,12 @@ sitetype = arg[3]
 
 if (toupper(sitetype)=='A' | toupper(sitetype)=='B' | toupper(sitetype)=='C'){
   print(toupper(sitetype))
-  poly=st_read('/data/satellite/forestProjection/sdm/Modelling/natura2000/poly/Natura2000_end2021_rev1_epsg3035_forest_25perc_100ha_mountain_climate.shp')
+  poly=st_read('/pathToInputData/Natura2000_end2021_rev1_epsg3035_forest_25perc_100ha_mountain_climate.shp')
   poly = poly %>% filter(SITETYPE==toupper(sitetype))
 }else{
-  poly=vect('/data/satellite/forestProjection/sdm/Modelling/natura2000/poly/Natura2000_end2021_rev1_epsg3035_forest_25perc_100ha_mountain_climate.shp')
+  poly=vect('/pathToInputData/Natura2000_end2021_rev1_epsg3035_forest_25perc_100ha_mountain_climate.shp')
 }
-reference=rast(paste0('/data/satellite/forestProjection/sdm/Modelling/prediction/reference/tif/Prediction_',species,'_1971_1990_',dist,'.tif'))
+reference=rast(paste0('/pathToInputData/Prediction_',species,'_1971_1990_',dist,'.tif'))
 
 ##rename preds to without _1971_1990
 ##generate all combinations to iterate through
