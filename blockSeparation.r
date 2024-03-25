@@ -1,7 +1,5 @@
 #!/usr/bin/env Rscript
 
-renv::load('/home/reichmut/Workspace/modelling')
-
 arg = commandArgs(trailingOnly=TRUE)
 
 suppressPackageStartupMessages(library(raster))
@@ -10,8 +8,8 @@ suppressPackageStartupMessages(library(blockCV))
 
 how = arg[1]
 range=as.integer(arg[2])
-path = "/work/reichmut/Modelling/"
-reference = read.csv('/data/satellite/forestProjection/sdm/Modelling/modellingDataFrame1971_1990.csv')
+path = "/path/to/Folder/"
+reference = read.csv('/pathToInputData/modellingDataFrame1971_1990.csv')
 
 biomodTable = function(ref, block, how, range){
   ##this will allow the division of all reference data into blocks
@@ -42,7 +40,7 @@ if (how=='random'|how=='systematic'){
 
 } else if (how=='predefined'){
   print(how)
-  block = readRDS('/data/satellite/forestProjection/sdm/Modelling/blocks_random_600000.rds')
+  block = readRDS('/pathToInputData/blocks_random_600000.rds')
   poly = block$blocks
   poly = st_as_sf(poly, crs = 3035)
   pa_data <- sf::st_as_sf(cbind(reference[,c(1,2,13)]), coords = c("x", "y"), crs = 3035)
