@@ -1,7 +1,5 @@
 #!/usr/bin/env Rscript
 
-renv::load('/home/reichmut/Workspace/modelling')
-
 suppressPackageStartupMessages(library(raster))
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(dplyr))
@@ -52,9 +50,9 @@ modelIteration = function(iter){
   }else{
     model <- try(modelling(species=species, modeltype=algo, predictors=pred, train=train, path=path, filename=filename), silent=FALSE)
     if("try-error" %in% class(model)) return()
-    saveRDS(model, file=paste0(path,'model/train/model_',filename,'.rds'))
+    saveRDS(model, file=paste0(path,'model_',filename,'.rds'))
 
-    sink(file=paste0(path,'model/coefficients/summary_',filename,'.txt'))
+    sink(file=paste0(path,'summary_',filename,'.txt'))
     print(summary(model))
     sink()
 
@@ -111,7 +109,7 @@ evaluation = function(test, train, species, model, filename, modeltype){
   predi <- try(predict(model, test[,pred], type="response"), silent=FALSE)
   if("try-error" %in% class(predi)) return()
 
-  png(paste0(path,'model/plots/scatter_',filename,'.png'), width = 1080, height = 780, units = "px", pointsize = 12)
+  png(paste0(path,'scatter_',filename,'.png'), width = 1080, height = 780, units = "px", pointsize = 12)
   plot(test[,species], predi, main=paste0('Scatter test vs. prediction data ', filename))
   dev.off()
 
@@ -180,7 +178,7 @@ evaluation = function(test, train, species, model, filename, modeltype){
   result['filename'] = filename
 
   result = as.data.frame(result)
-  write.csv(result, paste0(path,'model/stats/statistics_',filename,'.csv'), row.names = FALSE)
+  write.csv(result, paste0(path,'statistics_',filename,'.csv'), row.names = FALSE)
   return(list(predictData=predi,testData=test[,species], fitData=fit))
 }
 
@@ -189,12 +187,12 @@ modelPredict = function(species, dist, period, path){
   filename = paste0(species,'_',period,'_',dist)
   print(filename)
   
-  maxTSS = read.csv(paste0(path,'model/prediction/selected_',dist,'.csv'))
+  maxTSS = read.csv(paste0(path,'selected_',dist,'.csv'))
   library(dplyr)
   selectBlock = maxTSS %>% filter(Species==species) %>% select(filename)
   print(selectBlock)
   ##read model that revealed best TSS for species and dist
-  modelFile = paste0(path,'model/train/model_',selectBlock$filename,'.rds')
+  modelFile = paste0(path,'model_',selectBlock$filename,'.rds')
   #modelFile = paste0('/data/satellite/forestProjection/sdm/Modelling/model/train/model_',selectBlock$filename,'.rds')
   model <<- try(readRDS(modelFile), silent=TRUE)
       if("try-error" %in% class(model)) return()
@@ -239,9 +237,9 @@ predictIter = function(quantile, period, q, rcp, path, filename){
   poly = as(sf_test, Class='Spatial')
   raster_final=rasterFromXYZ(poly, crs=raster::crs(raster))
   if (period=='1971_1990'){
-    writeRaster(raster_final, filename=paste0(path,'model/prediction/reference/tif/Prediction_',filename,'.tif'), overwrite=TRUE)
+    writeRaster(raster_final, filename=paste0(path,'Prediction_',filename,'.tif'), overwrite=TRUE)
   }else{
-    writeRaster(raster_final, filename=paste0(path,'model/prediction/rcp',rcp,'/tif/Prediction_',filename,'_',q,'.tif'), overwrite=TRUE)
+    writeRaster(raster_final, filename=paste0(path,'Prediction_',filename,'_',q,'.tif'), overwrite=TRUE)
   }
   print(paste0('finished ', period, ' ', q))
   raster_final=NULL
@@ -317,7 +315,7 @@ aic <- function(y, n, mu, wt, rank) {
 
 
 histogram = function(trainBefore, train, result, filename, species){
-  png(paste0(path,'model/plots/histogram_',filename,'.png'), width = 1780, height = 2780, units = "px", pointsize = 12)
+  png(paste0(path,'histogram_',filename,'.png'), width = 1780, height = 2780, units = "px", pointsize = 12)
   par(mfrow=c(2,2))
   hist(trainBefore[,species], main='Histogram train data', xlab='Train probabilities', xlim=c(0,1),cex.lab = 2, cex.axis=2)
   #hist(trainBeforePresence[,species], main='Histogram continuous train data > 0', xlab='Train probabilities >0', xlim=c(0,1),cex.lab = 2, cex.axis=2)
@@ -333,11 +331,11 @@ histogram = function(trainBefore, train, result, filename, species){
 
 rasterToPng = function(filename, rcp, period){
  if (period=='1971_1990'){
-   raster = raster(paste0(path,'model/prediction/reference/tif/Prediction_',filename,'.tif'))
-   output = paste0('model/prediction/reference/plot/Prediction_',filename,'.pdf')
+   raster = raster(paste0(path,'Prediction_',filename,'.tif'))
+   output = paste0('Prediction_',filename,'.pdf')
  }else{
-   raster = raster(paste0(path,'model/prediction/rcp',rcp,'/tif/Prediction_',filename,'.tif'))
-   output = paste0('model/prediction/rcp',rcp,'/plot/Prediction_',filename,'.pdf')
+   raster = raster(paste0(path,'Prediction_',filename,'.tif'))
+   output = paste0('Prediction_',filename,'.pdf')
  }   
   maxval = raster@data@max
   print(maxval)
@@ -383,14 +381,14 @@ evalNatura = function(r){
     filenameDiff = paste0(species,'_',time,'_',dist,'_rcp',rcp,'_quantile',perc)
   }
   
-  rasterTime =rast(paste0('/data/satellite/forestProjection/sdm/Modelling/prediction/rcp',rcp,'/tif/Prediction_',filenameDiff,'.tif'))
+  rasterTime =rast(paste0('Prediction_',filenameDiff,'.tif'))
   maxRaster = minmax(reference)[2]
   rasterDiff = ifel(rasterTime==0 & reference==0, -999, (rasterTime-reference)/maxRaster)
   writeRaster(rasterDiff, paste0(path,'model/naturaEval/rasterDiff/rcp',rcp,'/',filenameDiff,'_diff.tif'), overwrite=TRUE)
-  rasterDiff=rast(paste0(path,'model/naturaEval/rasterDiff/rcp',rcp,'/',filenameDiff,'_diff.tif'))
+  rasterDiff=rast(paste0(path,filenameDiff,'_diff.tif'))
   polyRasterDiff=extractPoly(poly,rasterDiff)
-  writeVector(polyRasterDiff, paste0(path,'model/naturaEval/polyExtract/rcp',rcp,'/',filenames,'_extract.shp'), overwrite=TRUE)
-  polyRasterDiff = vect(paste0(path,'model/naturaEval/polyExtract/rcp',rcp,'/',filenames,'_extract.shp'))
+  writeVector(polyRasterDiff, paste0(path,filenames,'_extract.shp'), overwrite=TRUE)
+  polyRasterDiff = vect(paste0(path,filenames,'_extract.shp'))
 
 }
 
@@ -432,7 +430,7 @@ plotting = function(r){
 
 plotDiff = function(period, filename, rcp, stats){
   if (period != '1971_1990') {
-    dats = st_read(paste0(path,'model/naturaEval/polyExtract/rcp',rcp,'/',filename,'_extract.shp'))
+    dats = st_read(paste0(path,filename,'_extract.shp'))
     dat = st_simplify(dats, preserveTopology = TRUE, dTolerance = 8000)
     
   }else{
@@ -466,7 +464,7 @@ plotDiff = function(period, filename, rcp, stats){
             legend.direction='horizontal', 
             legend.key.width = unit(4.5, 'cm'),
             legend.key.height = unit(1, 'cm'))
-    pdf(paste0(path,'model/naturaEval/plot/polyDifference/rcp',rcp,'/',filename,'_',stat,'.pdf'), width = 10, height = 13)              
+    pdf(paste0(path,filename,'_',stat,'.pdf'), width = 10, height = 13)              
     print(g)
     dev.off()
   }  
@@ -475,7 +473,7 @@ plotDiff = function(period, filename, rcp, stats){
 
 plottingRasterDiff=function(species, period, rcp, perc){
   fileNames = paste0(species,'_',period,'_20_rcp',rcp,'_quantile',perc)
-  rasterDiff=raster(paste0(path,'model/naturaEval/rasterDiff/rcp',rcp,'/',fileNames,'_diff.tif'))
+  rasterDiff=raster(paste0(path,fileNames,'_diff.tif'))
   rasterPoints=as.data.frame(rasterToPoints(rasterDiff))
   colnames(rasterPoints)[3] = 'value'
   low='#8E0152' #"#562456"
@@ -504,7 +502,7 @@ plottingRasterDiff=function(species, period, rcp, perc){
           legend.direction='horizontal', 
           legend.key.width = unit(4.5, 'cm'),
           legend.key.height = unit(1, 'cm'))
-  pdf(paste0(path,'model/naturaEval/plot/rasterDifference/rcp',rcp,'/',fileNames,'_diff.pdf'), width = 10, height = 13)#, res=300)              
+  pdf(paste0(path,fileNames,'_diff.pdf'), width = 10, height = 13)#, res=300)              
   print(g)
   dev.off()
 }
@@ -512,12 +510,12 @@ plottingRasterDiff=function(species, period, rcp, perc){
 extractData=function(filename, rcp, perc, sitetype, period){
   if (endsWith(filename,'_sitetype')==TRUE){
       ##combine all extracted natura2000 areas
-      files <- list.files(paste0(path,'model/naturaEval/polyExtract/rcp',rcp,'/'), pattern=".shp", full.names = TRUE) 
+      files <- list.files(path, pattern=".shp", full.names = TRUE) 
       f = files[grepl(filename, files, fixed = TRUE)]
       inter <- lapply(f, st_read)
       dat = do.call(rbind, inter)
   }else if (period != '1971_1990'){
-      dat = st_read(paste0(path,'model/naturaEval/polyExtract/rcp',rcp,'/',filename,'_extract.shp'))
+      dat = st_read(paste0(path,filename,'_extract.shp'))
   }else{
     return()
   }
