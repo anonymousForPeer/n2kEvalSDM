@@ -14,8 +14,8 @@ species = arg[1]
 print(species)
 dist = 20
 rcp = arg[2]
-perc = c('50','5','95') #'50','5',
-period = c('2079_2098', '2021_2040', '2041_2060', '2061_2080') # '2021_2040', '2041_2060',
+perc = c('50','5','95') 
+period = c('2079_2098', '2021_2040', '2041_2060', '2061_2080')
 sitetype = arg[3]
 
 if (toupper(sitetype)=='A' | toupper(sitetype)=='B' | toupper(sitetype)=='C'){
@@ -30,7 +30,7 @@ reference=rast(paste0('/pathToInputData/Prediction_',species,'_1971_1990_',dist,
 ##rename preds to without _1971_1990
 ##generate all combinations to iterate through
 paramList=expand.grid(species, period, dist, rcp, perc, sitetype, stringsAsFactors = FALSE)
-#make nested list for calling in parallel computing
+
 iterate_list <- split(paramList, seq(nrow(paramList)))
 
 purrr::walk(.x=1:nrow(paramList), .f=evalNatura)
