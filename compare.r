@@ -12,11 +12,11 @@ suppressPackageStartupMessages(library(terra))
 path = ""/path/to/Folder/""
 species = arg[1]
 print(species)
-dist = 20
-rcp = arg[2]
+dist = arg[2]
+rcp = arg[3]
 perc = c('50','5','95') 
-period = c('2079_2098', '2021_2040', '2041_2060', '2061_2080')
-sitetype = arg[3]
+period = c('2021_2040', '2041_2060', '2061_2080', '2079_2098')
+sitetype = arg[4]
 
 if (toupper(sitetype)=='A' | toupper(sitetype)=='B' | toupper(sitetype)=='C'){
   print(toupper(sitetype))
