@@ -13,11 +13,11 @@ suppressPackageStartupMessages(library(purrr))
 suppressPackageStartupMessages(library(data.table))
 
 
-pred <- c('bs_top', #'cec_top', #'bs_top', #'oc_top'
-          'growing_degree_days',
+pred <- c('bs_top', 
+          'growingDegreeDays',
           'waterDeficit',
-          'ConradsContinentalityIndex',
-          'P15_PrecipSeasonality')
+          'continentalityIndex',
+          'PrecipSeasonality')
 
 modelIteration = function(iter){
   ##separate list to variables
