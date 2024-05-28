@@ -12,14 +12,16 @@ species=("Picea.abies" "Fagus.sylvatica" "Quercus.sp"
 "Carpinus.betulus" "Populus.tremula" "Quercus.pyrenaica"
 "Pinus.sylvestris" "Castanea.sativa" "Prunus.avium" "Pinus.contorta")
 
-model='gam' #('gam','glm','brt')
-dist=20
+model='gam' #('gam','glm','brt') #choose one model
+dist=20 #estimated spatial distance for reducing spatial autocorrelation
+rcp='26' #('26','45','85') #chose a rcp
 for spec in ${species[*]}
 do
-  echo $spec  # -a 26,45,85  -necessary for compare
+  ##run each script separately per species
+  echo $spec  
   Rscript --vanilla blockSeparation.r predefined 600000
   #Rscript --vanilla modelling.r "$species" "$model" "$dist" #20
-  #Rscript --vanilla prediction.r "$species" 20 #"$dist"
-  #Rscript --vanilla compare.r "$species" "$dist" "ABC"
+  #Rscript --vanilla prediction.r "$species" "$dist"
+  #Rscript --vanilla compare.r "$species" "$dist" "$rcp" "ABC"
 echo ' '
 done
